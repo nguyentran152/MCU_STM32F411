@@ -1,0 +1,4 @@
+../Core/Src/main.c:21:5:main	128	static
+../Core/Src/main.c:55:6:UART2_Init	8	static
+../Core/Src/main.c:71:6:Error_Handler	4	static
+../Core/Src/main.c:76:9:Data_conver_to_caps	16	static
