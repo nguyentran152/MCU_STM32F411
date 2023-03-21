@@ -60,8 +60,8 @@ all: main-build
 main-build: HSE_SYSCLK_8MHz.elf secondary-outputs
 
 # Tool invocations
-HSE_SYSCLK_8MHz.elf HSE_SYSCLK_8MHz.map: $(OBJS) $(USER_OBJS) D:\Embedded_C\MCU2\HSE_SYSCLK_8MHz\STM32F411VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "HSE_SYSCLK_8MHz.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Embedded_C\MCU2\HSE_SYSCLK_8MHz\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="HSE_SYSCLK_8MHz.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+HSE_SYSCLK_8MHz.elf HSE_SYSCLK_8MHz.map: $(OBJS) $(USER_OBJS) D:\Embedded_C\My_workspace\MCU_STM32F411\HSE_SYSCLK_8MHz\STM32F411VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "HSE_SYSCLK_8MHz.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Embedded_C\My_workspace\MCU_STM32F411\HSE_SYSCLK_8MHz\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="HSE_SYSCLK_8MHz.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

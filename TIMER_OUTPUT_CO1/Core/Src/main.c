@@ -16,9 +16,8 @@
 
 
 void Error_Handler(void);
-void GPIO_Init(void);
 void TIMER2_Init(void);
-void SystemClockConfig_HSE(uint8_t clock_freq);
+void SystemClockConfig(uint8_t clock_freq);
 
 
 
@@ -35,8 +34,8 @@ uint32_t ccr_content;
 int main()
 {
 	HAL_Init();
-	SystemClockConfig_HSE(SYSCLK_CONF_FREQ_50MHz);
-	GPIO_Init();
+
+	SystemClockConfig(SYSCLK_CONF_FREQ_50MHz);
 
 	TIMER2_Init();
 
@@ -67,37 +66,26 @@ int main()
 
 
 
-void GPIO_Init(void)
-{
-    __HAL_RCC_GPIOD_CLK_ENABLE();
-	GPIO_InitTypeDef ledgpio;
-	ledgpio.Pin = GPIO_PIN_12;
-	ledgpio.Mode = GPIO_MODE_OUTPUT_PP;
-	ledgpio.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOD,&ledgpio);
-}
 
-
-
-void SystemClockConfig_HSE(uint8_t clock_freq)
+void SystemClockConfig(uint8_t clock_freq)
 {
 	RCC_OscInitTypeDef osc_inits;
 	RCC_ClkInitTypeDef clk_inits;
 
-	uint32_t FLatency  = 0;
-	osc_inits.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSE;
-	osc_inits.HSEState = RCC_HSE_ON;
+	uint32_t FLatency = 0;
+
+	osc_inits.OscillatorType = RCC_OSCILLATORTYPE_HSI;
 	osc_inits.HSIState = RCC_HSI_ON;
-	osc_inits.LSEState = RCC_LSE_ON;
+	osc_inits.HSICalibrationValue = 16; //default
 	osc_inits.PLL.PLLState = RCC_PLL_ON;
-	osc_inits.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+	osc_inits.PLL.PLLSource = RCC_PLLSOURCE_HSI;
 
 
 	switch(clock_freq)
 	{
 		case SYSCLK_CONF_FREQ_50MHz:
 		{
-			osc_inits.PLL.PLLM = 8;
+			osc_inits.PLL.PLLM = 16;
 			osc_inits.PLL.PLLN = 100;
 			osc_inits.PLL.PLLP = 2;
 			osc_inits.PLL.PLLQ = 8;
@@ -109,13 +97,13 @@ void SystemClockConfig_HSE(uint8_t clock_freq)
 			clk_inits.APB1CLKDivider = RCC_HCLK_DIV2; // 25MHz APB1
 			clk_inits.APB2CLKDivider = RCC_HCLK_DIV2;// 25MHz APB2
 
-			FLatency  = FLASH_LATENCY_1;
+			FLatency = FLASH_LATENCY_1;
 
 			break;
 		}
 		case SYSCLK_CONF_FREQ_80MHz:
 		{
-			osc_inits.PLL.PLLM = 8;
+			osc_inits.PLL.PLLM = 16;
 			osc_inits.PLL.PLLN = 160;
 			osc_inits.PLL.PLLP = 2;
 			osc_inits.PLL.PLLQ = 8;
@@ -127,13 +115,13 @@ void SystemClockConfig_HSE(uint8_t clock_freq)
 			clk_inits.APB1CLKDivider = RCC_HCLK_DIV2; // 40MHz APB1
 			clk_inits.APB2CLKDivider = RCC_HCLK_DIV2;// 40MHz APB2
 
-			FLatency  = FLASH_LATENCY_2;
+			FLatency = FLASH_LATENCY_2;
 
 			break;
 		}
 		case SYSCLK_CONF_FREQ_100MHz:
 		{
-			osc_inits.PLL.PLLM = 8;
+			osc_inits.PLL.PLLM = 16;
 			osc_inits.PLL.PLLN = 200;
 			osc_inits.PLL.PLLP = 2;
 			osc_inits.PLL.PLLQ = 8;
@@ -142,7 +130,7 @@ void SystemClockConfig_HSE(uint8_t clock_freq)
 									RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 			clk_inits.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK; //100MHz
 			clk_inits.AHBCLKDivider = RCC_SYSCLK_DIV1; // 100MHz AHB
-			clk_inits.APB1CLKDivider = RCC_HCLK_DIV2; // 50MHz APB1
+			clk_inits.APB1CLKDivider = RCC_HCLK_DIV4; // 25MHz APB1
 			clk_inits.APB2CLKDivider = RCC_HCLK_DIV2;// 50MHz APB2
 
 			FLatency = FLASH_LATENCY_3;
@@ -158,7 +146,7 @@ void SystemClockConfig_HSE(uint8_t clock_freq)
 		Error_Handler();
 	}
 
-	if(HAL_RCC_ClockConfig(&clk_inits, FLatency ) != HAL_OK)
+	if(HAL_RCC_ClockConfig(&clk_inits, FLatency) != HAL_OK)
 	{
 		Error_Handler();
 	}
@@ -167,8 +155,6 @@ void SystemClockConfig_HSE(uint8_t clock_freq)
 
 	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-	/* SysTick_IRQn interrupt configuration */
-	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 
 }
 
@@ -214,28 +200,28 @@ void TIMER2_Init(void)
 
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	/* TIM3_CH1 toggling with frequency = 500 Hz */
+	/* TIM2_CH1 toggling with frequency = 500 Hz */
 	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
 	{
 	   ccr_content = HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_1);
 	   __HAL_TIM_SET_COMPARE(htim,TIM_CHANNEL_1,ccr_content+pulse1_value);
 	}
 
-	/* TIM3_CH2 toggling with frequency = 1000 Hz */
+	/* TIM2_CH2 toggling with frequency = 1000 Hz */
 	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
 	{
 	   ccr_content = HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_2);
 	   __HAL_TIM_SET_COMPARE(htim,TIM_CHANNEL_2,ccr_content+pulse2_value);
 	}
 
-	/* TIM3_CH3 toggling with frequency = 2000 Hz */
+	/* TIM2_CH3 toggling with frequency = 2000 Hz */
 	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)
 	{
 	   ccr_content = HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_3);
 	   __HAL_TIM_SET_COMPARE(htim,TIM_CHANNEL_3,ccr_content+pulse3_value);
 	}
 
-	/* TIM3_CH4 toggling with frequency = 4000 Hz */
+	/* TIM2_CH4 toggling with frequency = 4000 Hz */
 	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)
 	{
 		ccr_content = HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_4);

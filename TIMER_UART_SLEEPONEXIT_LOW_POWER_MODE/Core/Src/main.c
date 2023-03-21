@@ -31,7 +31,7 @@ int main()
 
 
 	//enable sleep on exit
-	SCB->SCR |= (1 << 1);
+	HAL_PWR_EnableSleepOnExit();
 
 	TIM10->SR = 0; //clc
 	HAL_TIM_Base_Start_IT(&htimer10);
@@ -53,12 +53,15 @@ void GPIO_Init(void)
 	HAL_GPIO_Init(GPIOD,&ledgpio);
 }
 
+/*
+ * Time base 10ms
+ */
 void TIMER10_Init(void)
 {
 	htimer10.Instance = TIM10;
 	htimer10.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htimer10.Init.Prescaler = 24;
-	htimer10.Init.Period = 64000-1;
+	htimer10.Init.Prescaler = 4999;
+	htimer10.Init.Period = 31;
 
 	if(HAL_TIM_Base_Init(&htimer10) != HAL_OK)
 	{

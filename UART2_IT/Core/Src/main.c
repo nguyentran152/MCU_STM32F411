@@ -59,8 +59,6 @@ void UART2_Init(void)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-
-	data_buffer[count++] = data_receive;
 	if(data_receive == '\r')
 	{
 		Reception_complete = TRUE;

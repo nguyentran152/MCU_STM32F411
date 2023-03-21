@@ -1,0 +1,10 @@
+11:30:37 **** Incremental Build of configuration Debug for project TIMER_INPUT_CAP1 ****
+make -j8 all 
+arm-none-eabi-size   TIMER_INPUT_CAP1.elf 
+   text	   data	    bss	    dec	    hex	filename
+  27572	    488	   1816	  29876	   74b4	TIMER_INPUT_CAP1.elf
+Finished building: default.size.stdout
+ 
+
+11:30:37 Build Finished. 0 errors, 0 warnings. (took 405ms)
+

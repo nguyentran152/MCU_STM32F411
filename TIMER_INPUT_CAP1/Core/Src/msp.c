@@ -24,6 +24,19 @@ void HAL_MspInit(void)
 	HAL_NVIC_SetPriority(UsageFault_IRQn, 0, 0);
 }
 
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
+{
+	//1. Enable the clock for timer 10 peripheral
+	__HAL_RCC_TIM10_CLK_ENABLE();
+
+	//2. Enable the IRQ of timer 10
+	HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+
+	//3. set up priority
+	HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 15, 0);
+}
+
+
 void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim)
 {
 	 GPIO_InitTypeDef tim2ch1_gpio;

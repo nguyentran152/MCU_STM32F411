@@ -14,14 +14,15 @@
 #define TRUE 	1
 #define FALSE	0
 
-void SystemClockConfig_HSE(uint8_t clock_freq);
+void SystemClockConfig(uint8_t clock_freq);
 void Error_Handler(void);
 void GPIO_Init(void);
 void TIMER2_Init(void);
-void SystemClockConfig(uint8_t clock_freq);
-void LSE_Configuration(void);
+void TIMER10_Init(void);
 void UART2_Init(void);
 
+
+TIM_HandleTypeDef htimer10;
 TIM_HandleTypeDef htimer2;
 UART_HandleTypeDef huart2;
 
@@ -39,17 +40,20 @@ int main()
 	char usr_msg[100];
 
 	HAL_Init();
-//	SystemClockConfig(SYSCLK_CONF_FREQ_50MHz);
-	SystemClockConfig_HSE(SYSCLK_CONF_FREQ_50MHz);
+
+	SystemClockConfig(SYSCLK_CONF_FREQ_100MHz);
+
 	GPIO_Init();
+
+	TIMER10_Init();
+
+	HAL_TIM_Base_Start_IT(&htimer10);
 
 	UART2_Init();
 
 	TIMER2_Init();
 
-	LSE_Configuration();
-
-
+	HAL_TIM_IC_Start_IT(&htimer2, TIM_CHANNEL_1);
 
 	while(1)
 	{
@@ -58,7 +62,7 @@ int main()
 			if(input_capture[1] > input_capture[0])
 				capture_difference = input_capture[1] - input_capture[0];
 			else
-				capture_difference = (0XFFFFFFFF -input_capture[0]) + input_capture[1];
+				capture_difference = (0XFFFFFFFF - input_capture[0]) + input_capture[1];
 
 
 		timer2_cnt_freq = (HAL_RCC_GetPCLK1Freq() * 2 ) / (htimer2.Init.Prescaler + 1);
@@ -77,8 +81,6 @@ int main()
 	return 0;
 }
 
-
-
 void GPIO_Init(void)
 {
     __HAL_RCC_GPIOD_CLK_ENABLE();
@@ -89,6 +91,29 @@ void GPIO_Init(void)
 	HAL_GPIO_Init(GPIOD,&ledgpio);
 }
 
+
+/*
+ * Clock timer peripheral is 100MHz (APB2 x 2)
+ * Period value must be configured to get the time base of 100ms:
+ * 		Consider prescaler = 24  => prescaler out put(CNT_CLK) = ( TIMx_CLK / (prescaler +1) )
+ * 		=> clock count(CNT_CLK) = 4MMHz
+ * 		Time period = 0.25us
+ * 	Period value(ARR) 	= 10us / Time period
+ * 				 		= 40 valid ( 16bit count: max 65535)
+ */
+void TIMER10_Init(void)
+{
+	htimer10.Instance = TIM10;
+	htimer10.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htimer10.Init.Prescaler = 24;
+	htimer10.Init.Period = 40-1;
+
+	if(HAL_TIM_Base_Init(&htimer10) != HAL_OK)
+	{
+		Error_Handler();
+	}
+}
+
 void SystemClockConfig(uint8_t clock_freq)
 {
 	RCC_OscInitTypeDef osc_inits;
@@ -96,9 +121,8 @@ void SystemClockConfig(uint8_t clock_freq)
 
 	uint32_t FLatency = 0;
 
-	osc_inits.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSE;
+	osc_inits.OscillatorType = RCC_OSCILLATORTYPE_HSI;
 	osc_inits.HSIState = RCC_HSI_ON;
-	osc_inits.LSEState = RCC_LSE_ON;
 	osc_inits.HSICalibrationValue = 16; //default
 	osc_inits.PLL.PLLState = RCC_PLL_ON;
 	osc_inits.PLL.PLLSource = RCC_PLLSOURCE_HSI;
@@ -153,7 +177,7 @@ void SystemClockConfig(uint8_t clock_freq)
 									RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 			clk_inits.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK; //100MHz
 			clk_inits.AHBCLKDivider = RCC_SYSCLK_DIV1; // 100MHz AHB
-			clk_inits.APB1CLKDivider = RCC_HCLK_DIV2; // 50MHz APB1
+			clk_inits.APB1CLKDivider = RCC_HCLK_DIV4; // 25MHz APB1
 			clk_inits.APB2CLKDivider = RCC_HCLK_DIV2;// 50MHz APB2
 
 			FLatency = FLASH_LATENCY_3;
@@ -174,106 +198,18 @@ void SystemClockConfig(uint8_t clock_freq)
 		Error_Handler();
 	}
 
-	/*Configure the systick timer interrupt frequency (for every 1 ms) */
+	//configure systick
 
 	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
-	/* SysTick_IRQn interrupt configuration */
-	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
-void SystemClockConfig_HSE(uint8_t clock_freq)
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	RCC_OscInitTypeDef osc_inits;
-	RCC_ClkInitTypeDef clk_inits;
-
-	uint32_t FLatency  = 0;
-	osc_inits.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSE;
-	osc_inits.HSEState = RCC_HSE_ON;
-	osc_inits.HSIState = RCC_HSI_ON;
-	osc_inits.LSEState = RCC_LSE_ON;
-	osc_inits.PLL.PLLState = RCC_PLL_ON;
-	osc_inits.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-
-
-	switch(clock_freq)
-	{
-		case SYSCLK_CONF_FREQ_50MHz:
-		{
-			osc_inits.PLL.PLLM = 8;
-			osc_inits.PLL.PLLN = 100;
-			osc_inits.PLL.PLLP = 2;
-			osc_inits.PLL.PLLQ = 8;
-
-			clk_inits.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | \
-									RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-			clk_inits.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK; //50MHz
-			clk_inits.AHBCLKDivider = RCC_SYSCLK_DIV1; // 50MHz AHB
-			clk_inits.APB1CLKDivider = RCC_HCLK_DIV2; // 25MHz APB1
-			clk_inits.APB2CLKDivider = RCC_HCLK_DIV2;// 25MHz APB2
-
-			FLatency  = FLASH_LATENCY_1;
-
-			break;
-		}
-		case SYSCLK_CONF_FREQ_80MHz:
-		{
-			osc_inits.PLL.PLLM = 8;
-			osc_inits.PLL.PLLN = 160;
-			osc_inits.PLL.PLLP = 2;
-			osc_inits.PLL.PLLQ = 8;
-
-			clk_inits.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | \
-									RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-			clk_inits.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK; //80MHz
-			clk_inits.AHBCLKDivider = RCC_SYSCLK_DIV1; // 80MHz AHB
-			clk_inits.APB1CLKDivider = RCC_HCLK_DIV2; // 40MHz APB1
-			clk_inits.APB2CLKDivider = RCC_HCLK_DIV2;// 40MHz APB2
-
-			FLatency  = FLASH_LATENCY_2;
-
-			break;
-		}
-		case SYSCLK_CONF_FREQ_100MHz:
-		{
-			osc_inits.PLL.PLLM = 8;
-			osc_inits.PLL.PLLN = 200;
-			osc_inits.PLL.PLLP = 2;
-			osc_inits.PLL.PLLQ = 8;
-
-			clk_inits.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | \
-									RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-			clk_inits.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK; //100MHz
-			clk_inits.AHBCLKDivider = RCC_SYSCLK_DIV1; // 100MHz AHB
-			clk_inits.APB1CLKDivider = RCC_HCLK_DIV2; // 50MHz APB1
-			clk_inits.APB2CLKDivider = RCC_HCLK_DIV2;// 50MHz APB2
-
-			FLatency = FLASH_LATENCY_3;
-
-			break;
-		}
-		default:
-			return;
-	}
-
-	if(HAL_RCC_OscConfig(&osc_inits) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	if(HAL_RCC_ClockConfig(&clk_inits, FLatency ) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	/*Configure the systick timer interrupt frequency (for every 1 ms) */
-	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-
-	/* SysTick_IRQn interrupt configuration */
-	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 }
+
 
 void TIMER2_Init(void)
 {
@@ -314,26 +250,10 @@ void UART2_Init(void)
 	}
 }
 
-void LSE_Configuration(void)
-{
-	#if 0
-	RCC_OscInitTypeDef osc_inits;
-	osc_inits.OscillatorType = RCC_OSCILLATORTYPE_LSE;
-	osc_inits.LSEState = RCC_LSE_ON;
-
-	if(HAL_RCC_OscConfig(&osc_inits) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	#endif
-
-	HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSI, RCC_MCODIV_4);
-}
 
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-#if 1
 	 if(! is_capture_done)
 	 {
 		 if(count == 1)
@@ -344,11 +264,10 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		 else if (count == 2)
 		 {
 			 input_capture[1] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_1);
-			 count =1;
+			 count = 1;
 			 is_capture_done = TRUE;
 		 }
 	 }
-#endif
 }
 
 

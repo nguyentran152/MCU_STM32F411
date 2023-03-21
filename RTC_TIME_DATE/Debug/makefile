@@ -60,8 +60,8 @@ all: main-build
 main-build: RTC_TIME_DATE.elf secondary-outputs
 
 # Tool invocations
-RTC_TIME_DATE.elf RTC_TIME_DATE.map: $(OBJS) $(USER_OBJS) D:\Embedded_C\MCU2\RTC_TIME_DATE\STM32F411VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "RTC_TIME_DATE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Embedded_C\MCU2\RTC_TIME_DATE\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="RTC_TIME_DATE.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+RTC_TIME_DATE.elf RTC_TIME_DATE.map: $(OBJS) $(USER_OBJS) D:\Embedded_C\My_workspace\MCU_STM32F411\RTC_TIME_DATE\STM32F411VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "RTC_TIME_DATE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Embedded_C\My_workspace\MCU_STM32F411\RTC_TIME_DATE\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="RTC_TIME_DATE.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -175,7 +175,7 @@ void TIMER2_Init(void)
 {
 	 TIM_OC_InitTypeDef tim2PWM_Config;
 	 htimer2.Instance = TIM2;
-	 htimer2.Init.Period = 9;
+	 htimer2.Init.Period = 9999;
 	 htimer2.Init.Prescaler = 4999;
 	 if ( HAL_TIM_PWM_Init(&htimer2) != HAL_OK)
 	 {

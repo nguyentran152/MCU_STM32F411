@@ -60,8 +60,8 @@ all: main-build
 main-build: TIMER_BASE_10us.elf secondary-outputs
 
 # Tool invocations
-TIMER_BASE_10us.elf TIMER_BASE_10us.map: $(OBJS) $(USER_OBJS) D:\Embedded_C\MCU2\TIMER_BASE_10us\STM32F411VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "TIMER_BASE_10us.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Embedded_C\MCU2\TIMER_BASE_10us\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="TIMER_BASE_10us.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+TIMER_BASE_10us.elf TIMER_BASE_10us.map: $(OBJS) $(USER_OBJS) D:\Embedded_C\My_workspace\MCU_STM32F411\TIMER_BASE_10us\STM32F411VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "TIMER_BASE_10us.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Embedded_C\My_workspace\MCU_STM32F411\TIMER_BASE_10us\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="TIMER_BASE_10us.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -1,0 +1,72 @@
+/*
+ * msp.c
+ *
+ *  Created on: Mar 21, 2023
+ *      Author: Nguyen Tran
+ */
+
+#include "main.h"
+
+void HAL_MspInit(void)
+{
+	//Low level processor specific inits
+	//1. Set up the priority grouping of the arm cortex Mx processor
+	HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+
+	//2. Enable the require system exceptions of the arm cortex Mx processor
+	//system control block -> System handler control and state register
+	SCB->SHCSR |= 0x7 << 16; //usage, bus, memory fault system exceptions
+
+	//3. Configure the priority for the system exceptions
+	HAL_NVIC_SetPriority(MemoryManagement_IRQn, 0, 0);
+	HAL_NVIC_SetPriority(BusFault_IRQn, 0, 0);
+	HAL_NVIC_SetPriority(UsageFault_IRQn, 0, 0);
+}
+
+
+void HAL_UART_MspInit(UART_HandleTypeDef *huart2)
+{
+	GPIO_InitTypeDef gpio_uart;
+
+	//Low level inits for UART5 Peripheral
+	//1. Enable the clock for the UART5 and GPIO peripheral
+	__HAL_RCC_UART5_CLK_ENABLE();
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	__HAL_RCC_GPIOD_CLK_ENABLE();
+	//2. The pin muxing configurations
+	gpio_uart.Pin = GPIO_PIN_12; //UART5_TX
+	gpio_uart.Mode = GPIO_MODE_AF_PP;
+	gpio_uart.Pull = GPIO_PULLUP;
+	gpio_uart.Speed = GPIO_SPEED_FAST;
+	gpio_uart.Alternate = GPIO_AF8_UART5;
+	HAL_GPIO_Init(GPIOC, &gpio_uart);
+
+	gpio_uart.Pin = GPIO_PIN_2; //UART5_RX
+	gpio_uart.Mode = GPIO_MODE_AF_PP;
+	gpio_uart.Pull = GPIO_PULLUP;
+	gpio_uart.Speed = GPIO_SPEED_FAST;
+	gpio_uart.Alternate = GPIO_AF8_UART5;
+	HAL_GPIO_Init(GPIOD, &gpio_uart);
+	//3. Enable the IRQ and set up the priority (NVIC Settings)
+	HAL_NVIC_EnableIRQ(UART5_IRQn);
+	HAL_NVIC_SetPriority(UART5_IRQn, 15, 0);
+}
+
+
+void HAL_CAN_MspInit(CAN_HandleTypeDef *hcan)
+{
+	GPIO_InitTypeDef GPIO_InitStruct;
+
+	__HAL_RCC_CAN1_CLK_ENABLE();
+
+	/**CAN1 GPIO Configuration
+	PD0     ------> CAN1_RX
+	PD1     ------> CAN1_TX
+	*/
+	GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+	GPIO_InitStruct.Alternate = GPIO_AF9_CAN1;
+	HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+}

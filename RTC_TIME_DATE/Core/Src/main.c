@@ -45,14 +45,18 @@ int main()
 	SystemClockConfig_HSE(SYSCLK_CONF_FREQ_50MHz);
 	UART2_Init();
 
-	printmsg("This is RTC calendar Test program\r\n");
-
 	RTC_Init();
+
+	printmsg("This is RTC calendar Test program\r\n");
 
 	RTC_CalendarConfig();
 
-
-	while(1);
+	while(1)
+	{
+		//going to sleep
+		__WFI();
+		//MCU resume here when it wake up
+	}
 	return 0;
 }
 
@@ -60,14 +64,8 @@ int main()
 
 void GPIO_Init(void)
 {
-    __HAL_RCC_GPIOD_CLK_ENABLE();
+	GPIO_InitTypeDef  buttongpio;
     __HAL_RCC_GPIOA_CLK_ENABLE();
-
-	GPIO_InitTypeDef ledgpio,buttongpio;
-	ledgpio.Pin = GPIO_PIN_12;
-	ledgpio.Mode = GPIO_MODE_OUTPUT_PP;
-	ledgpio.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOD,&ledgpio);
 
 	buttongpio.Pin = GPIO_PIN_0;
 	buttongpio.Mode = GPIO_MODE_IT_FALLING;
@@ -99,9 +97,10 @@ void UART2_Init(void)
 void RTC_Init(void)
 {
    hrtc.Instance = RTC;
-   hrtc.Init.HourFormat =RTC_HOURFORMAT_12;
-   hrtc.Init.AsynchPrediv = 0x7F;
-   hrtc.Init.SynchPrediv = 0xFF;
+// hrtc.Init.HourFormat =RTC_HOURFORMAT_12;
+   hrtc.Init.HourFormat =RTC_HOURFORMAT_24;
+   hrtc.Init.AsynchPrediv = 0x7D; //1MHz clock HSE -> div 125
+   hrtc.Init.SynchPrediv = 0x1F40; //1MHz clock HSE -> div 8000
    hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
    hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_LOW;
    hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
@@ -117,19 +116,19 @@ void RTC_CalendarConfig(void)
 	RTC_TimeTypeDef RTC_TimeInit;
 	RTC_DateTypeDef RTC_DateInit;
 	//this function does RTC Calendar Config
-	//configure the calendar for Time : 11:11:10 PM Date : 20 july 2022 Wednesday
+	//configure the calendar for Time : 8:32:10 PM Date : 20 march 2023 Monday
 
-	RTC_TimeInit.Hours = 11;
-	RTC_TimeInit.Minutes = 11;
+	RTC_TimeInit.Hours = 8;
+	RTC_TimeInit.Minutes = 32;
 	RTC_TimeInit.Seconds = 10;
 	RTC_TimeInit.TimeFormat = RTC_HOURFORMAT12_PM;
 	HAL_RTC_SetTime(&hrtc, &RTC_TimeInit,RTC_FORMAT_BIN);
 
 
 	RTC_DateInit.Date = 20;
-	RTC_DateInit.Month = RTC_MONTH_JULY;
-	RTC_DateInit.Year = 22;
-	RTC_DateInit.WeekDay = RTC_WEEKDAY_WEDNESDAY;
+	RTC_DateInit.Month = RTC_MONTH_MARCH;
+	RTC_DateInit.Year = 23;
+	RTC_DateInit.WeekDay = RTC_WEEKDAY_MONDAY;
 
 	HAL_RTC_SetDate(&hrtc,&RTC_DateInit,RTC_FORMAT_BIN);
 
@@ -142,20 +141,22 @@ char* getDayofweek(uint8_t number)
 	return weekday[number-1];
 }
 
+
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	 RTC_TimeTypeDef RTC_TimeRead;
-	 RTC_DateTypeDef RTC_DateRead;
+	RTC_TimeTypeDef RTC_TimeRead;
+	RTC_DateTypeDef RTC_DateRead;
 
 
-	 HAL_RTC_GetTime(&hrtc,&RTC_TimeRead,RTC_FORMAT_BIN);
+	HAL_RTC_GetTime(&hrtc,&RTC_TimeRead,RTC_FORMAT_BIN);
 
-	 HAL_RTC_GetDate(&hrtc,&RTC_DateRead,RTC_FORMAT_BIN);
+	HAL_RTC_GetDate(&hrtc,&RTC_DateRead,RTC_FORMAT_BIN);
 
-	 printmsg("Current Time is : %02d:%02d:%02d\r\n",RTC_TimeRead.Hours,\
-			 RTC_TimeRead.Minutes,RTC_TimeRead.Seconds);
-	 printmsg("Current Date is : %02d-%2d-%2d  <%s> \r\n",RTC_DateRead.Month,RTC_DateRead.Date,\
-			 RTC_DateRead.Year,getDayofweek(RTC_DateRead.WeekDay));
+	printmsg("Current Time is : %02d:%02d:%02d\r\n",RTC_TimeRead.Hours,\
+		 RTC_TimeRead.Minutes,RTC_TimeRead.Seconds);
+	printmsg("Current Date is : %02d-%2d-%2d  <%s> \r\n",RTC_DateRead.Month,RTC_DateRead.Date,\
+		 RTC_DateRead.Year,getDayofweek(RTC_DateRead.WeekDay));
 }
 
 void SystemClockConfig_HSE(uint8_t clock_freq)

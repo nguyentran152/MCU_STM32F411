@@ -1,6 +1,6 @@
 ../Core/Src/main.c:25:5:main	8	static
 ../Core/Src/main.c:40:6:GPIO_Init	32	static
-../Core/Src/main.c:50:6:TIMER10_Init	8	static
-../Core/Src/main.c:63:6:SystemClockConfig	88	static
-../Core/Src/main.c:155:6:HAL_TIM_PeriodElapsedCallback	16	static
-../Core/Src/main.c:160:6:Error_Handler	4	static
+../Core/Src/main.c:60:6:TIMER10_Init	8	static
+../Core/Src/main.c:73:6:SystemClockConfig	88	static
+../Core/Src/main.c:165:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:170:6:Error_Handler	4	static

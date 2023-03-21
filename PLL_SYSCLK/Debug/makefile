@@ -60,8 +60,8 @@ all: main-build
 main-build: PLL_SYSCLK.elf secondary-outputs
 
 # Tool invocations
-PLL_SYSCLK.elf PLL_SYSCLK.map: $(OBJS) $(USER_OBJS) D:\Embedded_C\MCU2\PLL_SYSCLK\STM32F411VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "PLL_SYSCLK.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Embedded_C\MCU2\PLL_SYSCLK\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PLL_SYSCLK.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+PLL_SYSCLK.elf PLL_SYSCLK.map: $(OBJS) $(USER_OBJS) D:\Embedded_C\My_workspace\MCU_STM32F411\PLL_SYSCLK\STM32F411VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "PLL_SYSCLK.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Embedded_C\My_workspace\MCU_STM32F411\PLL_SYSCLK\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PLL_SYSCLK.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

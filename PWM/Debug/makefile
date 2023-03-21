@@ -60,8 +60,8 @@ all: main-build
 main-build: PWM.elf secondary-outputs
 
 # Tool invocations
-PWM.elf PWM.map: $(OBJS) $(USER_OBJS) D:\Embedded_C\MCU2\PWM\STM32F411VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "PWM.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Embedded_C\MCU2\PWM\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PWM.map" -Wl,--gc-sections -static "-u_printf_float" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+PWM.elf PWM.map: $(OBJS) $(USER_OBJS) D:\Embedded_C\My_workspace\MCU_STM32F411\PWM\STM32F411VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "PWM.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Embedded_C\My_workspace\MCU_STM32F411\PWM\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PWM.map" -Wl,--gc-sections -static "-u_printf_float" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

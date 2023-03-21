@@ -60,8 +60,8 @@ all: main-build
 main-build: UART2_IT.elf secondary-outputs
 
 # Tool invocations
-UART2_IT.elf UART2_IT.map: $(OBJS) $(USER_OBJS) D:\Embedded_C\MCU2\UART2_IT\STM32F411VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "UART2_IT.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Embedded_C\MCU2\UART2_IT\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="UART2_IT.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+UART2_IT.elf UART2_IT.map: $(OBJS) $(USER_OBJS) D:\Embedded_C\My_workspace\MCU_STM32F411\UART2_IT\STM32F411VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "UART2_IT.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Embedded_C\My_workspace\MCU_STM32F411\UART2_IT\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="UART2_IT.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

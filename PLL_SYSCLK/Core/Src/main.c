@@ -28,9 +28,9 @@ int main()
 	char msg[100];
 	HAL_Init();
 
-//	SystemClockConfig(SYSCLK_CONF_FREQ_50MHz);
+	SystemClockConfig(SYSCLK_CONF_FREQ_50MHz);
 //	SystemClockConfig(SYSCLK_CONF_FREQ_80MHz);
-	SystemClockConfig(SYSCLK_CONF_FREQ_100MHz);
+//	SystemClockConfig(SYSCLK_CONF_FREQ_100MHz);
 
 	UART2_Init();
 
@@ -139,7 +139,7 @@ void SystemClockConfig(uint8_t clock_freq)
 									RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 			clk_inits.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK; //100MHz
 			clk_inits.AHBCLKDivider = RCC_SYSCLK_DIV1; // 100MHz AHB
-			clk_inits.APB1CLKDivider = RCC_HCLK_DIV2; // 50MHz APB1
+			clk_inits.APB1CLKDivider = RCC_HCLK_DIV4; // 25MHz APB1
 			clk_inits.APB2CLKDivider = RCC_HCLK_DIV2;// 50MHz APB2
 
 			FLatency = FLASH_LATENCY_3;

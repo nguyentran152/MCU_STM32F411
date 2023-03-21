@@ -1,0 +1,10 @@
+14:53:58 **** Incremental Build of configuration Debug for project PLL_SYSCLK ****
+make -j8 all 
+arm-none-eabi-size   PLL_SYSCLK.elf 
+   text	   data	    bss	    dec	    hex	filename
+  10944	    120	   1656	  12720	   31b0	PLL_SYSCLK.elf
+Finished building: default.size.stdout
+ 
+
+14:53:58 Build Finished. 0 errors, 0 warnings. (took 276ms)
+

@@ -1,0 +1,10 @@
+14:14:25 **** Incremental Build of configuration Debug for project WFI_Button ****
+make -j8 all 
+arm-none-eabi-size   WFI_Button.elf 
+   text	   data	    bss	    dec	    hex	filename
+   5692	     40	   1640	   7372	   1ccc	WFI_Button.elf
+Finished building: default.size.stdout
+ 
+
+14:14:25 Build Finished. 0 errors, 0 warnings. (took 249ms)
+

@@ -54,7 +54,12 @@ int main()
 
 	RTC_Init();
 
-	while(1);
+	while(1)
+	{
+		//going to sleep
+		__WFI();
+		//MCU resume here when it wake up
+	}
 	return 0;
 }
 
@@ -102,8 +107,8 @@ void RTC_Init(void)
 {
    hrtc.Instance = RTC;
    hrtc.Init.HourFormat =RTC_HOURFORMAT_12;
-   hrtc.Init.AsynchPrediv = 0x7F;
-   hrtc.Init.SynchPrediv = 0xFF;
+   hrtc.Init.AsynchPrediv = 0x7D; //1MHz clock HSE -> div 125
+   hrtc.Init.SynchPrediv = 0x1F40; //1MHz clock HSE -> div 8000
    hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
    hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_LOW;
    hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
@@ -114,22 +119,22 @@ void RTC_Init(void)
    }
 }
 
-void  RTC_CalendarConfig(void)
+void RTC_CalendarConfig(void)
 {
 	RTC_TimeTypeDef RTC_TimeInit;
 	RTC_DateTypeDef RTC_DateInit;
 
-	RTC_TimeInit.Hours = 7;
-	RTC_TimeInit.Minutes = 59;
-	RTC_TimeInit.Seconds = 50;
+	RTC_TimeInit.Hours = 1;
+	RTC_TimeInit.Minutes = 20;
+	RTC_TimeInit.Seconds = 0;
 	RTC_TimeInit.TimeFormat = RTC_HOURFORMAT12_AM;
 	HAL_RTC_SetTime(&hrtc, &RTC_TimeInit,RTC_FORMAT_BIN);
 
 
-	RTC_DateInit.Date = 20;
-	RTC_DateInit.Month = RTC_MONTH_JULY;
-	RTC_DateInit.Year = 22;
-	RTC_DateInit.WeekDay = RTC_WEEKDAY_WEDNESDAY;
+	RTC_DateInit.Date = 21;
+	RTC_DateInit.Month = RTC_MONTH_MARCH;
+	RTC_DateInit.Year = 23;
+	RTC_DateInit.WeekDay = RTC_WEEKDAY_TUESDAY;
 
 	HAL_RTC_SetDate(&hrtc,&RTC_DateInit,RTC_FORMAT_BIN);
 
@@ -161,6 +166,22 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	 RTC_AlarmConfig();
 }
 
+void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
+{
+	printmsg("Alarm Triggered\r\n");
+
+	RTC_TimeTypeDef RTC_TimeRead;
+
+	HAL_RTC_GetTime(hrtc,&RTC_TimeRead,RTC_FORMAT_BIN);
+
+	printmsg("Current Time is : %02d:%02d:%02d\r\n",RTC_TimeRead.Hours,\
+	RTC_TimeRead.Minutes,RTC_TimeRead.Seconds);
+
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
+	HAL_Delay(2000);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
+}
+
 
 void RTC_AlarmConfig()
 {
@@ -170,19 +191,16 @@ void RTC_AlarmConfig()
 
 	 HAL_RTC_DeactivateAlarm(&hrtc,RTC_ALARM_A);
 
-	 //set alarm 8h AM every sunday
+	 //set alarm 1h AM every day
 
 	 AlarmA_Set.Alarm = RTC_ALARM_A;
-	 AlarmA_Set.AlarmTime.Hours = 8;
-	 AlarmA_Set.AlarmTime.Minutes = 0;
-	 AlarmA_Set.AlarmTime.Seconds = 0;
+	 AlarmA_Set.AlarmTime.Hours = 1;
+	 AlarmA_Set.AlarmTime.Minutes = 20;
+	 AlarmA_Set.AlarmTime.Seconds = 10;
 	 AlarmA_Set.AlarmTime.TimeFormat = RTC_HOURFORMAT12_AM;
-	 AlarmA_Set.AlarmDateWeekDaySel  = RTC_ALARMDATEWEEKDAYSEL_WEEKDAY;
-	 AlarmA_Set.AlarmDateWeekDay = RTC_WEEKDAY_SUNDAY;
-
-	 AlarmA_Set.AlarmMask = RTC_ALARMMASK_MINUTES |RTC_ALARMMASK_SECONDS ;
-
+	 AlarmA_Set.AlarmMask = RTC_ALARMMASK_DATEWEEKDAY ;
 	 AlarmA_Set.AlarmSubSecondMask = RTC_ALARMSUBSECONDMASK_NONE;
+
 	 if ( HAL_RTC_SetAlarm_IT(&hrtc, &AlarmA_Set, RTC_FORMAT_BIN) != HAL_OK)
 	 {
 		 Error_Handler();

@@ -47,12 +47,22 @@ void GPIO_Init(void)
 	HAL_GPIO_Init(GPIOD,&ledgpio);
 }
 
+
+/*
+ * Clock timer peripheral is 100MHz (APB2 x 2)
+ * Period value must be configured to get the time base of 100ms:
+ * 		Consider prescaler = 24  => prescaler out put(CNT_CLK) = ( TIMx_CLK / (prescaler +1) )
+ * 		=> clock count(CNT_CLK) = 4MMHz
+ * 		Time period = 0.25us
+ * 	Period value(ARR) 	= 10us / Time period
+ * 				 		= 40 valid ( 16bit count: max 65535)
+ */
 void TIMER10_Init(void)
 {
 	htimer10.Instance = TIM10;
 	htimer10.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htimer10.Init.Prescaler = 9;
-	htimer10.Init.Period = 50-1;
+	htimer10.Init.Prescaler = 24;
+	htimer10.Init.Period = 40-1;
 
 	if(HAL_TIM_Base_Init(&htimer10) != HAL_OK)
 	{
@@ -123,7 +133,7 @@ void SystemClockConfig(uint8_t clock_freq)
 									RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 			clk_inits.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK; //100MHz
 			clk_inits.AHBCLKDivider = RCC_SYSCLK_DIV1; // 100MHz AHB
-			clk_inits.APB1CLKDivider = RCC_HCLK_DIV2; // 50MHz APB1
+			clk_inits.APB1CLKDivider = RCC_HCLK_DIV4; // 25MHz APB1
 			clk_inits.APB2CLKDivider = RCC_HCLK_DIV2;// 50MHz APB2
 
 			FLatency = FLASH_LATENCY_3;

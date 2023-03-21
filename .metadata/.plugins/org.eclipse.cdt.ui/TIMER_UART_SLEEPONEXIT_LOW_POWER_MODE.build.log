@@ -1,0 +1,10 @@
+11:22:58 **** Incremental Build of configuration Debug for project TIMER_UART_SLEEPONEXIT_LOW_POWER_MODE ****
+make -j8 all 
+arm-none-eabi-size   TIMER_UART_SLEEPONEXIT_LOW_POWER_MODE.elf 
+   text	   data	    bss	    dec	    hex	filename
+   9628	     52	   1708	  11388	   2c7c	TIMER_UART_SLEEPONEXIT_LOW_POWER_MODE.elf
+Finished building: default.size.stdout
+ 
+
+11:22:58 Build Finished. 0 errors, 0 warnings. (took 314ms)
+

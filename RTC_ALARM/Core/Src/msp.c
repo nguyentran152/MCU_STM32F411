@@ -52,18 +52,20 @@ void HAL_RTC_MspInit(RTC_HandleTypeDef* hrtc)
 {
 	  RCC_OscInitTypeDef        RCC_OscInitStruct;
 	  RCC_PeriphCLKInitTypeDef RCC_RTCPeriClkInit;
-	  //1. Turn on the LSE
-	  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSE;
-	  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+	  //1. Turn on the HSE
+	  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
 	  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+
 	  if(HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
 	  {
 		  Error_Handler();
 	  }
 
-	  //2. select LSE as RTCCLK
+	  //2. select HSE as RTCCLK
 	  RCC_RTCPeriClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
-	  RCC_RTCPeriClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+	  RCC_RTCPeriClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_HSE_DIV8; //1MHz
+
 	  if( HAL_RCCEx_PeriphCLKConfig(&RCC_RTCPeriClkInit)!= HAL_OK)
 	  {
 		  Error_Handler();
